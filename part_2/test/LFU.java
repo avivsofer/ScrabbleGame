@@ -1,6 +1,9 @@
 package test;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Iterator;
+
 
 public class LFU implements CacheReplacementPolicy {
 
@@ -8,8 +11,9 @@ public class LFU implements CacheReplacementPolicy {
     private final HashMap<String, Node> cache; //מאחסן זוגות מפתח-ערך
     private final LinkedHashMap<String, Integer> freqMap; //מאחסן זוגות מפתח-ערך
 
-    public LFU(int capacity) {
-        this.capacity = capacity;
+
+    public LFU() {
+        this.capacity = 10;
         this.cache = new HashMap<>(); //יצירת אובייקט חדש מסוג HashMap והשמתו
         this.freqMap = new LinkedHashMap<>(capacity, 0.75f, true); //אובייקט חדש מסוג LinkedHashMap עם קיבולת מוגדרת (capacity), גורם עומס (0.75f) וסדר גישה מופעל (true)
     }
@@ -36,8 +40,13 @@ public class LFU implements CacheReplacementPolicy {
         int minFreq = Integer.MAX_VALUE;
         String keyToEvict = null;
 
-        for (String key : freqMap.keySet()) {
-            int freq = freqMap.get(key);
+    // Using iterator to avoid ConcurrentModificationException
+        Iterator<Map.Entry<String, Integer>> iterator = freqMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Integer> entry = iterator.next();
+            String key = entry.getKey();
+            int freq = entry.getValue();
+
             if (freq < minFreq) {
                 minFreq = freq;
                 keyToEvict = key;
@@ -47,8 +56,10 @@ public class LFU implements CacheReplacementPolicy {
         cache.remove(keyToEvict);
         freqMap.remove(keyToEvict);
         return keyToEvict;
-    }
+}
 
+
+    
     private void updateFreq(String word) {
         int freq = freqMap.get(word);
         freqMap.put(word, freq + 1);
@@ -86,7 +97,7 @@ public class LFU implements CacheReplacementPolicy {
         }
 
         public void updateFreq() {
-            this.freq++;
+            this.freq++; 
         }
     }
 }

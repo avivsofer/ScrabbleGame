@@ -8,27 +8,29 @@ public class LRU implements CacheReplacementPolicy {
     private final HashMap<String, Node> cache;
     private final LinkedList<Node> keys;
 
-    public LRU(int capacity) {
-        this.capacity = capacity;
+
+    public LRU() {
+        this.capacity = 10;
         this.cache = new HashMap<>();
         this.keys = new LinkedList<>();
     }
+    
 
-    @Override
+    @Override //הוספת מילה למטמון
     public void add(String word) {
-        if (cache.containsKey(word)) {
-            cache.get(word).updateTimestamp();
-            moveToHead(word);
+        if (cache.containsKey(word)) { // אם המילה קיימת
+            cache.get(word).updateTimestamp(); // עדכון הזמן האחרון בו נעשה שימוש במילה
+            moveToHead(word); // המילה שהתקבלה כארגומנט מועברת לראש הרשימה של המטמון 
             return;
         }
 
-        if (cache.size() == capacity) {
-            evictLeastRecentlyUsed();
+        if (cache.size() == capacity) { // אם המטמון מלא
+            evictLRU();// מוחקת את המילה האחרונה במטמון ומעדכנת את המפתחות
         }
 
-        Node node = new Node(word);
-        cache.put(word, node);
-        keys.addFirst(node);
+        Node node = new Node(word); // הסופת צומת במטמון
+        cache.put(word, node); // השמת המילה החדשה בצומת
+        keys.addFirst(node); //מעביר את הצומת הזאת לראש רשימת המפתחות
     }
 
     @Override
@@ -37,14 +39,15 @@ public class LRU implements CacheReplacementPolicy {
         cache.remove(node.word);
         return node.word;
     }
-
-    private void moveToHead(String word) {
+    
+    //העברת המילה לראש רשימת המפתחות
+    private void moveToHead(String word) { 
         Node node = cache.get(word);
         keys.remove(node);
         keys.addFirst(node);
     }
 
-    private void evictLeastRecentlyUsed() {
+    private void evictLRU() {
         Node node = keys.removeLast();
         cache.remove(node.word);
     }
