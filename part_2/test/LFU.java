@@ -1,9 +1,6 @@
 package test;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Iterator;
-
 
 public class LFU implements CacheReplacementPolicy {
 
@@ -40,13 +37,8 @@ public class LFU implements CacheReplacementPolicy {
         int minFreq = Integer.MAX_VALUE;
         String keyToEvict = null;
 
-    // Using iterator to avoid ConcurrentModificationException
-        Iterator<Map.Entry<String, Integer>> iterator = freqMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Integer> entry = iterator.next();
-            String key = entry.getKey();
-            int freq = entry.getValue();
-
+        for (String key : freqMap.keySet()) {
+            int freq = freqMap.get(key);
             if (freq < minFreq) {
                 minFreq = freq;
                 keyToEvict = key;
@@ -56,10 +48,8 @@ public class LFU implements CacheReplacementPolicy {
         cache.remove(keyToEvict);
         freqMap.remove(keyToEvict);
         return keyToEvict;
-}
+    }
 
-
-    
     private void updateFreq(String word) {
         int freq = freqMap.get(word);
         freqMap.put(word, freq + 1);
