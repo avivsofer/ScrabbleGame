@@ -6,14 +6,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.BitSet;
 
 public class BloomFilter {
-    private final BitSet bitSet;
+    private final BitSet bitSet; //מבני נתונים לאכסון סדרות של ביטים
     private final int size;
     private final String[] hashAlgorithms;
 
     public BloomFilter(int size, String... hashAlgorithms) {
         this.size = size;
         this.bitSet = new BitSet(size);
-        this.hashAlgorithms = hashAlgorithms;
+        this.hashAlgorithms = hashAlgorithms; //מערך של האלגוריתמים שיתקבלו
     }
 
     public void add(String word) {
@@ -23,28 +23,36 @@ public class BloomFilter {
         }
     }
 
+    //בהינתן מחרוזת היא תחזיר בוליאני האם היא נמצאת ב bloom filter .
     public boolean contains(String word) {
         for (String algorithm : hashAlgorithms) {
             int hashIndex = getHashIndex(word, algorithm);
-            if (!bitSet.get(hashIndex)) {
-                return false;
+            if (hashIndex < size) {
+                if (!bitSet.get(hashIndex)) {
+                    return false;
+                }
             }
         }
         return true;
     }
+    
 
     private int getHashIndex(String word, String algorithm) {
         try {
             MessageDigest md = MessageDigest.getInstance(algorithm);
             byte[] digest = md.digest(word.getBytes());
             BigInteger bigInt = new BigInteger(1, digest);
-            return bigInt.mod(BigInteger.valueOf(size)).intValue();
+            int index = bigInt.mod(BigInteger.valueOf(size)).intValue();
+            if (index < 0) { // בדיקה שהערך שיחזור לא שלילי
+                index += size; // Ensure index is non-negative
+            }
+            return index;
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
-            // Handle the exception
             return -1;
         }
     }
+    
 
     @Override
     public String toString() {
@@ -54,14 +62,5 @@ public class BloomFilter {
         }
         return sb.toString();
     }
-
-    public static void main(String[] args) {
-        BloomFilter bf = new BloomFilter(256, "SHA-1", "MD5");
-        bf.add("hello");
-        bf.add("world");
-        System.out.println(bf.contains("hello")); // true
-        System.out.println(bf.contains("world")); // true
-        System.out.println(bf.contains("openai")); // false
-        System.out.println(bf); // Display the BitSet
-    }
+    
 }

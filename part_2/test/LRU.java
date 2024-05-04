@@ -2,19 +2,11 @@ package test;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class LRU implements CacheReplacementPolicy {
+public class LRU implements CacheReplacementPolicy { //מחזירה את המילה שהיה בה שימוש לפני הכי הרבה זמן
 
-    private final int capacity;
-    private final HashMap<String, Node> cache;
-    private final LinkedList<Node> keys;
-
-
-    public LRU() {
-        this.capacity = 10;
-        this.cache = new HashMap<>();
-        this.keys = new LinkedList<>();
-    }
-    
+    int capacityCache = CacheManager.maxSize; ;
+    private final HashMap<String, Node> cache= new HashMap<>();
+    private final LinkedList<Node> keys= new LinkedList<>();
 
     @Override //הוספת מילה למטמון
     public void add(String word) {
@@ -24,7 +16,7 @@ public class LRU implements CacheReplacementPolicy {
             return;
         }
 
-        if (cache.size() == capacity) { // אם המטמון מלא
+        if (cache.size() == capacityCache) { // אם המטמון מלא
             evictLRU();// מוחקת את המילה האחרונה במטמון ומעדכנת את המפתחות
         }
 
@@ -48,9 +40,12 @@ public class LRU implements CacheReplacementPolicy {
     }
 
     private void evictLRU() {
-        Node node = keys.removeLast();
-        cache.remove(node.word);
+        if (!keys.isEmpty()) {
+            Node node = keys.removeLast();
+            cache.remove(node.word);
+        }
     }
+    
 
     private static class Node {
         private final String word;

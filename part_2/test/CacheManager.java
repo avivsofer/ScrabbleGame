@@ -3,13 +3,14 @@ import java.util.HashSet;
 
 public class CacheManager {
 
-    private final int maxSize; // גדול ה- cache המקסימלי
+    static int maxSize; // גדול ה- cache המקסימלי
     private final HashSet<String> cache;
     private final CacheReplacementPolicy crp;
 
+
     //מקבל את הגודל המקסימלי של cache 
     public CacheManager(int maxSize, CacheReplacementPolicy crp) {
-        this.maxSize = maxSize; 
+        CacheManager.maxSize = maxSize; 
         this.cache = new HashSet<>();
         this.crp = crp;
     }
@@ -22,11 +23,23 @@ public class CacheManager {
     public void add(String word) { 
         
         if (cache.size() >= maxSize) {
-            String wordToRemove = crp.remove(); // מציאת המילה שיש להסיר
+            String wordToRemove = crp.remove(); //  מציאת המילה שיש להסיר בעזרת LRU או LFU
             cache.remove(wordToRemove); //הסרת המילה שמצאנו
         }
 
         crp.add(word); //הוספת המילה ל crp
         cache.add(word); // הוספת המילה החדשה לזכרון
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public HashSet<String> getCache() {
+        return cache;
+    }
+
+    public CacheReplacementPolicy getCrp() {
+        return crp;
     }
 }
