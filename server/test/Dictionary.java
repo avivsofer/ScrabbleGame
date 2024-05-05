@@ -63,7 +63,7 @@ private final String[] existFileNames;
         }
     }
 
-    public Boolean challenge(String word) {
+    public boolean challenge(String word) {
         Boolean wordExs = IOSearcher.search(word, existFileNames);
         if (wordExs) {
             existWordsCacheLRU.add(word);
